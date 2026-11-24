@@ -1,7 +1,42 @@
 {
   "version": 1.0,
   "last_updated": "2024-05-22T10:00:00Z",
-  "servers": [],
+  "servers": [
+    {
+      "id": "srv_01",
+      "name": "Canada🇨🇦 ",
+      "host": "vpn320086889.opengw.net",
+      "port": 1886,
+      "username": "vpn",
+      "password": "vpn",
+      "certificate_settings": {
+        "verify_server_cert": false,
+        "cert_cn": "opengw.net",
+        "save_cert_request": false
+      },
+      "auth_settings": {
+        "ms_chap_v2": true,
+        "chap": true,
+        "pap": true,
+        "eap_ms_chap_v2": false,
+        "eap_tls": false
+      },
+      "network_settings": {
+        "mtu": 1500,
+        "limit_mss": 1300,
+        "tls_sni": "cbi.ir",
+        "allow_local_port": false,
+        "use_proxy": "none"
+      },
+      "advanced_settings": {
+        "save_credentials": true,
+        "retry_before_prompt": false,
+        "use_fingerprint": false,
+        "retry_seconds": 0,
+        "connection_timeout": 0
+      }
+    }
+  ],
   "ads": {
     "is_active": true,
     "image_url": "https://example.com/banner.jpg",
