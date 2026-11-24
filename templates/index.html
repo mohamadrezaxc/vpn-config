@@ -15,12 +15,17 @@
         th { background-color: #007bff; color: white; }
         .btn-danger { background-color: #dc3545; width: auto; padding: 5px 15px; }
         .btn-danger:hover { background-color: #c82333; }
+        .alert { padding: 15px; margin-bottom: 20px; border-radius: 5px; }
+        .alert-danger { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
     </style>
 </head>
 <body>
     <div class="container">
         <h2>مدیریت سرورها (پنل ابری)</h2>
         
+        <!-- بخش نمایش خطا -->
+        <div id="error-message" class="alert alert-danger" style="display: none;"></div>
+
         <h3>افزودن سرور جدید</h3>
         <form action="/add_server" method="post">
             <input type="text" name="name" placeholder="نام سرور (مثلاً سرور ژاپن)" required>
@@ -43,18 +48,24 @@
                 </tr>
             </thead>
             <tbody>
-                {% for server in data.servers %}
-                <tr>
-                    <td>{{ server.name }}</td>
-                    <td>{{ server.host }}:{{ server.port }}</td>
-                    <td>
-                        <form action="/delete_server" method="post" style="display:inline;">
-                            <input type="hidden" name="server_id" value="{{ server.id }}">
-                            <button type="submit" class="btn-danger" onclick="return confirm('مطمئنید؟')">حذف</button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
+                {% if data and data.servers %}
+                    {% for server in data.servers %}
+                    <tr>
+                        <td>{{ server.name }}</td>
+                        <td>{{ server.host }}:{{ server.port }}</td>
+                        <td>
+                            <form action="/delete_server" method="post" style="display:inline;">
+                                <input type="hidden" name="server_id" value="{{ server.id }}">
+                                <button type="submit" class="btn-danger" onclick="return confirm('مطمئنید؟')">حذف</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="3" style="text-align: center;">هیچ سروری یافت نشد. اولین سرور خود را اضافه کنید.</td>
+                    </tr>
+                {% endif %}
             </tbody>
         </table>
     </div>
