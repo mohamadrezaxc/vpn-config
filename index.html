@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پنل مدیریت VPN</title>
+    <style>
+        body { font-family: Tahoma, sans-serif; background-color: #f4f7f6; padding: 20px; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        input, button { padding: 10px; margin: 5px 0; border: 1px solid #ccc; border-radius: 5px; width: 100%; box-sizing: border-box; }
+        button { background-color: #28a745; color: white; border: none; cursor: pointer; font-weight: bold; }
+        button:hover { background-color: #218838; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; text-align: right; border-bottom: 1px solid #ddd; }
+        th { background-color: #007bff; color: white; }
+        .btn-danger { background-color: #dc3545; width: auto; padding: 5px 15px; }
+        .btn-danger:hover { background-color: #c82333; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>مدیریت سرورها (پنل ابری)</h2>
+        
+        <h3>افزودن سرور جدید</h3>
+        <form action="/add_server" method="post">
+            <input type="text" name="name" placeholder="نام سرور (مثلاً سرور ژاپن)" required>
+            <input type="text" name="host" placeholder="آدرس سرور" required>
+            <input type="number" name="port" placeholder="پورت" value="1843" required>
+            <input type="text" name="username" placeholder="نام کاربری" value="vpn" required>
+            <input type="text" name="password" placeholder="رمز عبور" value="vpn" required>
+            <button type="submit">افزودن سرور</button>
+        </form>
+
+        <hr style="margin: 30px 0;">
+
+        <h3>لیست سرورهای فعال</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>نام</th>
+                    <th>آدرس و پورت</th>
+                    <th>عملیات</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for server in data.servers %}
+                <tr>
+                    <td>{{ server.name }}</td>
+                    <td>{{ server.host }}:{{ server.port }}</td>
+                    <td>
+                        <form action="/delete_server" method="post" style="display:inline;">
+                            <input type="hidden" name="server_id" value="{{ server.id }}">
+                            <button type="submit" class="btn-danger" onclick="return confirm('مطمئنید؟')">حذف</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
