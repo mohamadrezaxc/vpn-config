@@ -9,13 +9,11 @@ from fastapi.templating import Jinja2Templates
 app = FastAPI()
 
 # تنظیمات گیت‌هاب
-# توکن از تنظیمات Vercel (Environment Variables) خوانده می‌شود
-GITHUB_TOKEN = os.getenv("GITHUB_TOKEN") 
+GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 REPO_OWNER = "mohamadrezaxc"
 REPO_NAME = "vpn-config"
 FILE_PATH = "servers.json"
 
-# برای Vercel باید مسیر قالب‌ها دقیق مشخص شود
 templates = Jinja2Templates(directory="templates")
 
 def get_file_from_github():
@@ -26,7 +24,9 @@ def get_file_from_github():
         data = response.json()
         content = base64.b64decode(data['content']).decode('utf-8')
         return json.loads(content), data['sha']
-    return None, None
+    else:
+        print(f"GitHub API Error: {response.status_code} - {response.text}")
+        return None, None
 
 def update_file_in_github(content_dict, sha):
     url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{FILE_PATH}"
@@ -41,6 +41,8 @@ def update_file_in_github(content_dict, sha):
         "branch": "main"
     }
     response = requests.put(url, headers=headers, json=data)
+    if response.status_code not in [200, 201]:
+        print(f"GitHub Update Error: {response.status_code} - {response.text}")
     return response.status_code in [200, 201]
 
 @app.get("/", response_class=HTMLResponse)
@@ -48,10 +50,22 @@ async def read_root(request: Request):
     data, sha = get_file_from_github()
     if data is None:
         return HTMLResponse("<h2>خطا: فایل servers.json پیدا نشد یا توکن اشتباه است.</h2>")
-    return templates.TemplateResponse("index.html", {"request": request, "data": data})
+    
+    # استفاده از روش جدید Starlette برای جلوگیری از خطای unhashable dict
+    return templates.TemplateResponse(
+        request=request, 
+        name="index.html", 
+        context={"data": data}
+    )
 
 @app.post("/add_server")
-async def add_server(name: str = Form(...), host: str = Form(...), port: int = Form(...), username: str = Form(...), password: str = Form(...)):
+async def add_server(
+    name: str = Form(...), 
+    host: str = Form(...), 
+    port: int = Form(...), 
+    username: str = Form(...), 
+    password: str = Form(...)
+):
     data, sha = get_file_from_github()
     if data:
         new_server = {
@@ -69,7 +83,7 @@ async def add_server(name: str = Form(...), host: str = Form(...), port: int = F
         data['servers'].append(new_server)
         if update_file_in_github(data, sha):
             return RedirectResponse(url="/", status_code=303)
-    return HTMLResponse("خطا در ذخیره سرور")
+    return HTMLResponse("خطا در ذخیره سرور. لاگ‌های Vercel را بررسی کنید.")
 
 @app.post("/delete_server")
 async def delete_server(server_id: str = Form(...)):
@@ -78,4 +92,4 @@ async def delete_server(server_id: str = Form(...)):
         data['servers'] = [s for s in data['servers'] if s['id'] != server_id]
         if update_file_in_github(data, sha):
             return RedirectResponse(url="/", status_code=303)
-    return HTMLResponse("خطا در حذف سرور")
+    return HTMLResponse("خطا در حذف سرور.")
